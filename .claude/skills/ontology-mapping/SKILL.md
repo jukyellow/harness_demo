@@ -1,84 +1,59 @@
 ---
 name: ontology-mapping
-description: 팔란티어 3-layer 온톨로지(Object/Link/Action)를 HS코드 도메인에 매핑하여 복수의 적용 대안을 설계하는 방법. 온톨로지 적용, 매핑, 설계 대안, Object/Link/Action 매핑, HS코드 데이터 모델링 작업이 필요할 때 반드시 이 스킬을 사용한다.
+description: 팔란티어 3-layer 패턴으로 HS 온톨로지의 데이터 모델을 설계하는 방법. 3-layer 구조, 수집 데이터 구조, 데이터 relation, 3계층 역할/활용/구축방법, 그래프 스키마 정의가 필요할 때 반드시 이 스킬을 사용한다. 온톨로지 설계 보완/수정/재실행 요청에도 사용.
 ---
 
-# Ontology Mapping (Palantir → HS Code)
+# Ontology Data Model Design (Stage 4)
 
 ## 언제 사용하는가
-리서치 산출물 두 개(`01_palantir_research.md`, `02_hscode_analysis.md`)를 입력받아 매핑 설계안을 만들어야 할 때. `ontology-architect` 에이전트의 주 스킬.
+분석 산출물(`analysis.md`)과 리서치(`research_tech.md`)를 입력받아 HS 온톨로지의 3-layer 데이터 모델을 그래프 스키마 수준으로 설계할 때. `ontology-architect`의 주 스킬.
 
 ## 워크플로우
 
 ### 1. 입력 검증
-두 입력 파일을 읽고, 다음을 확인한다:
-- 팔란티어 3-layer 정의가 명확히 정리되어 있는가
-- HS코드 핵심 엔티티 목록이 존재하는가
-- 누락 시 해당 에이전트에 SendMessage로 보강 요청
+`research_tech.md`, `analysis.md`를 읽고 3-layer 정의와 데이터 relation 표가 있는지 확인. 누락 시 해당 에이전트에 보강 요청.
 
-### 2. 매핑 원칙 수립
-설계안 작성 전 다음 원칙을 본문 상단에 명시한다:
-- **Object Layer**는 "존재"하는 개체 → 명사
-- **Link Layer**는 객체 간 "관계" → 동사 또는 관계명
-- **Action Layer**는 시스템이 "수행"하는 절차 → 행위/규칙
-- HS코드 GRI 같은 절차적 지식은 Action으로, 정태적 분류 계층(부/류/호/소호)은 Object로 우선 매핑
+### 2. 매핑 원칙
+- **Object** = 존재하는 개체(명사): HSCodeItem(부/류/호/소호/HSK), Commodity, TariffRate, Rule/Note, AdvanceRuling
+- **Link** = 관계(동사): parent_of, has_rate, governed_by, classified_as, has_ruling
+- **Action** = 수행 절차: ClassifyCommodity(GRI 적용), IssueAdvanceRuling
+- 정태적 계층은 Object, 연결은 Link, GRI·분류 결정은 Action.
 
-### 3. 복수 대안 작성 (최소 2개)
-
-각 대안에 대해 동일한 템플릿을 사용:
-
+### 3. 그래프 스키마 정의 (구현 가능 수준)
 ```markdown
-## 대안 {X}: {이름}
+### Object Types (노드 레이블)
+| 레이블 | 속성(타입) | 예시 |
+|--------|-----------|------|
+| HSCodeItem | code:str, level:str, name_ko:str, name_en:str, unit:str | "8471.30" |
+| TariffRate | basis:str, rate:float | 기본 8% |
 
-**전략 요약**: {한 문장}
+### Link Types (관계)
+| 타입 | from → to | 방향 | 의미 |
+|------|-----------|------|------|
+| PARENT_OF | HSCodeItem → HSCodeItem | 단방향 | 계층 |
+| HAS_RATE | HSCodeItem → TariffRate | 단방향 | 세율 |
 
-### Object Types
-| 이름 | 속성 | 예시 인스턴스 |
-|------|------|---------------|
-| Commodity | name, material, purpose | "노트북 컴퓨터" |
-| HSCodeItem | code, level(section/chapter/heading/subheading/HSK), description | "8471.30" |
-
-### Link Types
-| 이름 | from → to | 의미 |
-|------|-----------|------|
-| classified_as | Commodity → HSCodeItem | 분류 결과 |
-| parent_of | HSCodeItem → HSCodeItem | 계층 관계 |
-
-### Action Types
-| 이름 | 입력 | 출력 | 절차 |
+### Action Types (함수 시그니처)
+| 함수 | 입력 | 출력 | 절차 |
 |------|------|------|------|
-| ClassifyCommodity | Commodity | classified_as Link | GRI 1~6 적용 |
-| IssueAdvanceRuling | Application | AdvanceRuling Object | 사전심사 프로세스 |
-
-### 트레이드오프
-- **장점**: ...
-- **단점**: ...
-- **적합 시나리오**: ...
+| classify_commodity(desc, context) | 품목설명 | classified_as Link | GRI 1~6 적용 |
 ```
 
-대안 간 차별점은 다음 축으로 구분한다:
-- **보수적 vs 확장적**: 핵심 엔티티만 vs 분쟁/사전심사 등 확장 엔티티 포함
-- **세분도**: HSCodeItem 단일 클래스 vs 부/류/호/소호/HSK 클래스 분리
-- **GRI 모델링**: Action 단일 vs Action + RuleObject로 명시화
+### 4. 3계층 역할/활용/구축방법
+각 레이어에 대해: **역할**(무엇을 담는가), **활용**(Agentic 추론에서 어떻게 쓰이는가 — 후보 조회·규칙 적용), **구축방법**(어떤 데이터로 어떻게 적재하는가)을 명시한다.
 
-### 4. 검증 시나리오
-각 대안이 다음 시나리오에서 동작 가능한지 텍스트로 검증한다:
-- 시나리오 A: 신규 품목 "전기 자전거"의 분류
-- 시나리오 B: HS 개정으로 인한 코드 매핑 변경
-- 시나리오 C: 사전심사 신청 → 결정 → 효력 적용
-
-### 5. 권고안
-대안 중 1개를 권고하고, 단계적 도입 로드맵(MVP → 확장)을 제시한다.
+### 5. MVP 시드 범위
+특정 HS2류 1개를 골라 호/소호/HSK 트리 + 샘플 품목 3~5개 범위를 권장한다.
 
 ### 6. 출력
-결과는 `_workspace/03_ontology_design.md`에 저장한다.
+`_workspace/design_ontology.md`에 저장. 끝에 "그래프 스키마 요약(엔지니어 인계용)" 블록을 둔다.
 
 ## 품질 기준
-- 최소 2개 대안, 각 대안당 Object/Link/Action 모두 정의
-- 매핑 근거가 매핑 원칙과 일관됨
-- 검증 시나리오 최소 2개
+- 노드 레이블·속성(타입)·관계·Action 시그니처가 추가 설계 없이 구현 가능한 수준
+- 3계층 각각 역할/활용/구축방법이 명시됨
+- MVP 시드 범위가 구체적(특정 HS2류 지정)
 
 ## 흔한 실수
-- 한 가지 매핑만 제시 — 의사결정자가 비교할 수 없음
-- HS 분류 계층(부/류/호/소호)을 Object로만 매핑하고 Link(parent_of)를 빠뜨림 — 트리 구조 손실
-- GRI를 문서 참조로만 두고 Action으로 모델링하지 않음 — 분류 결정의 자동화/추적 불가
+- 계층(parent_of)을 빠뜨려 트리 구조 손실
+- GRI를 문서 참조로만 두고 Action으로 모델링하지 않음 — 분류 자동화/추적 불가
+- 속성에 타입을 안 적어 엔지니어가 추측하게 만듦

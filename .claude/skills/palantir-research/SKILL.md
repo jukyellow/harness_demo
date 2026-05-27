@@ -1,60 +1,43 @@
 ---
 name: palantir-research
-description: 팔란티어 Foundry/Gotham의 3-layer 온톨로지(Object/Link/Action) 자료를 외부에서 수집·정리하는 방법. 팔란티어 온톨로지, 3-layer, Object Layer, Link Layer, Action Layer, Foundry, Gotham 키워드가 등장하거나 팔란티어 데이터 모델링 리서치 작업이 필요할 때 반드시 이 스킬을 사용한다.
+description: HS 온톨로지 구축을 위한 기술·방법론·사례를 외부 리서치하는 방법. 팔란티어 3-layer(Object/Link/Action), Agentic 분류/추론 패턴, 그래프DB/RAG 방법론, MVP 기획안 작성이 필요할 때 반드시 이 스킬을 사용한다. 리서치 보완/업데이트/재실행 요청에도 사용.
 ---
 
-# Palantir 3-layer Ontology Research
+# Stage 1 Research (기술·방법론·사례 + 기획)
 
 ## 언제 사용하는가
-팔란티어 온톨로지 개념을 외부 자료로부터 1차 정리해야 할 때. `palantir-researcher` 에이전트의 주 스킬.
+HS 온톨로지 실험실 Stage 1에서 구축 기반 지식을 수집하고 MVP 기획안을 작성할 때. `palantir-researcher`의 주 스킬.
 
 ## 워크플로우
 
-### 1. 소스 검색 (WebSearch)
-다음 쿼리들을 조합해 사용한다:
-- `Palantir Foundry ontology object link action`
-- `Palantir three layer ontology architecture`
-- `Palantir Foundry Object Type Link Type Action Type`
-- `Palantir ontology data model semantic`
+### 1. 팔란티어 3-layer 온톨로지
+- Object Layer(존재하는 개체), Link Layer(관계), Action Layer(수행 절차)의 정의·구성요소·예시·통합 패턴을 분리 정리한다.
+- 1차 소스(palantir.com/docs/foundry/ontology, blog.palantir.com) 우선, 2차 소스는 출처 명기 후 교차 검증.
+- 추상 개념(데이터 모델링 철학) vs 구체 구현(Object Type/Link Type/Action Type)을 구분한다.
 
-### 2. 1차 소스 우선 수집 (WebFetch)
-다음 도메인을 1차 소스로 본다:
-- `palantir.com/docs/foundry/ontology` 계열
-- `blog.palantir.com`
-- `palantir.com/platforms/foundry`
+### 2. Agentic 분류·추론 패턴
+HS2→HS10 cycle 추론에 적용 가능한 패턴을 정리한다:
+- tool use / function calling, 다단계 reasoning, self-ask, 후보군 도출 후 추가 질문, 종료 조건, 근거·확신도 추적.
+- 프레임워크 후보(Claude API tool use, LangGraph 등)의 장단점.
 
-2차 소스(미디엄, 기술 블로그)는 출처를 명기하고 1차 소스로 교차 검증한다.
+### 3. 그래프DB·RAG·구축 방법론
+- 온톨로지 저장 옵션(networkx, Neo4j 등), 그래프-RAG, 임베딩 검색의 적용 포인트.
 
-### 3. 레이어별 구조화 정리
+### 4. 적용사례
+- 분류/지식그래프/규제 도메인의 유사 적용사례를 출처와 함께 정리한다.
 
-각 레이어에 대해 동일한 구조로 정리한다:
+### 5. MVP 기획 시사점
+- 리서치를 기획으로 연결: MVP 범위 권장, 주요 리스크, 권장 기술 스택, 후속 단계(분석/설계/MVP) 가이드라인 평가·개선 제안.
 
-```markdown
-## {Layer Name} Layer
-
-**정의**: {한 문단 요약}
-
-**구성요소**:
-- {요소 1}: 설명, 예시
-- {요소 2}: 설명, 예시
-
-**역할**: {다른 레이어와의 관계, 시스템에서의 책임}
-
-**핵심 인용** (출처: {URL}):
-> "{원문 발췌}"
-```
-
-### 4. 통합 패턴 정리
-세 레이어가 어떻게 협력하는지(예: 사용자가 Action을 실행하면 Object 상태가 변하고 Link 그래프가 갱신) 시나리오 기반으로 정리한다.
-
-### 5. 출력
-결과는 `_workspace/01_palantir_research.md`에 저장한다. 기존 파일이 있으면 읽고, 갱신이 필요한 섹션만 다시 쓴다.
+### 6. 출력
+`_workspace/research_tech.md`에 저장. 핵심 정의/도해는 원문 표현 + 출처 URL 보존. 기존 파일이 있으면 갱신 섹션만 다시 쓴다.
 
 ## 품질 기준
-- 각 레이어 정의에 최소 1개 이상의 1차 소스 인용 포함
-- 추상 개념(데이터 모델링 철학) vs 구체 구현(Object Type/Link Type/Action Type API) 구분 명시
-- 출처 URL은 그대로 보존하여 재검증 가능
+- 3-layer 각 레이어 + Agentic 패턴 + 기술 옵션이 모두 정리됨
+- MVP 기획 시사점이 추상론이 아니라 구체적 권장으로 연결됨
+- 각 레이어 정의에 1차 소스 인용 1개 이상
 
 ## 흔한 실수
-- 2차 소스(블로그)의 표현을 공식 정의로 인용 — 1차 소스 교차 검증 필수
-- "Object Type"과 "Object Layer"를 혼동 — Layer는 개념 분류, Type은 인스턴스의 클래스
+- 개념 정리에서 멈추고 MVP 기획으로 연결하지 않음
+- 2차 소스를 공식 정의로 인용 — 1차 소스 교차 검증 필수
+- "Object Type"과 "Object Layer" 혼동 — Layer는 개념 분류, Type은 클래스
