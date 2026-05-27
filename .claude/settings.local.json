@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:palantir.com)",
+      "WebFetch(domain:www.palantir.com)",
+      "WebFetch(domain:blog.palantir.com)",
+      "WebFetch(domain:docs.palantir.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:wcoomd.org)",
+      "WebFetch(domain:www.wcoomd.org)",
+      "WebFetch(domain:customs.go.kr)",
+      "WebFetch(domain:www.customs.go.kr)",
+      "WebFetch(domain:unipass.customs.go.kr)",
+      "WebFetch(domain:kita.net)",
+      "WebFetch(domain:law.go.kr)"
+    ]
+  }
+}
